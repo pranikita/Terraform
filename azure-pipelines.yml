@@ -1,0 +1,41 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+resources:
+  repositories:
+  - repository: self
+    type: git
+    ref: main
+
+  steps:
+  - checkout: self
+  - task: TerraformInstaller@0
+    displayName: Install Terraform 0.12.3
+  - task: TerraformTaskV1@0
+    displayName: 'Terraform : aws'
+    inputs:
+      provider: aws
+      backendServiceAWS: 37eb972f-71af-40a4-9788-22c8335fe8ad
+      backendAWSBucketName: terraform-state-bucket-unique
+      backendAWSKey: terraform.tfstate
+  - task: TerraformTaskV1@0
+    displayName: 'Terraform : aws'
+    inputs:
+      provider: aws
+      command: plan
+      environmentServiceNameAWS: 37eb972f-71af-40a4-9788-22c8335fe8ad
+  - task: TerraformTaskV1@0
+    displayName: 'Terraform : aws'
+    inputs:
+      provider: aws
+      command: apply
+      environmentServiceNameAWS: 37eb972f-71af-40a4-9788-22c8335fe8ad
+...
