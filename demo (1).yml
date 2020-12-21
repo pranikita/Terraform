@@ -1,0 +1,56 @@
+trigger:
+  branches:
+    include:
+    - main
+stages:
+- stage: Build
+  jobs:
+  - job: TerraformBuild
+    pool:
+      vmImage: ubuntu-latest
+    steps:
+    - task: TerraformInstaller@0
+      inputs:
+        terraformVersion: 0.12.3
+    - task: TerraformTaskV1@0
+      inputs:
+        provider: aws
+        command: init
+        backendServiceAWS: awsdemo
+        backendAWSBucketName: demobucket
+        backendAWSKey: terraform.tfstate
+- stage: Deploy
+  dependsOn:
+  - Build
+  jobs:
+  - job: TerraformBuildDev
+    pool:
+      vmImage: ubuntu-latest
+    steps:
+    - task: TerraformTaskV1@0
+      inputs:
+        provider: aws
+        command: plan
+        environmentServiceNameAWS: awsdemo
+    - task: TerraformTaskV1@0
+      inputs:
+        provider: aws
+        command: apply
+        environmentServiceNameAWS: awsdemo
+- stage: DeploytoPod
+  jobs:
+  - job: TerraformBuildProd
+    pool:
+      vmImage: ubuntu-latest
+    steps:
+    - task: TerraformTaskV1@0
+      inputs:
+        provider: aws
+        command: plan
+        environmentServiceNameAWS: awsdemo
+    - task: TerraformTaskV1@0
+      inputs:
+        provider: aws
+        command: apply
+        environmentServiceNameAWS: awsdemo
+
