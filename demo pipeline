@@ -7,9 +7,7 @@ stages:
   - job: TerraformBuild
     pool:
       vmImage: 'ubuntu-latest'
-
     steps:
-    
     - task: TerraformInstaller@0
       inputs:
         terraformVersion: '0.12.3'
@@ -21,6 +19,7 @@ stages:
         backendServiceAWS: 'Sandbox AWS for Terraform Service Connection'
         backendAWSBucketName: 'demobucket'
         backendAWSKey: 'terraform.tfstate'
+	
 - stage: DeploytoDev
   jobs:
   - job: TerraformBuildDev
@@ -31,13 +30,14 @@ stages:
       inputs:
         provider: 'aws'
         command: 'plan'
-		commandOptions: '-var-file terraform.dev.tfvars'
+	commandOptions: '-var-file terraform.dev.tfvars'
         environmentServiceNameAWS: 'Sandbox AWS for Terraform Service Connection'
     
     - task: TerraformTaskV1@0
       inputs:
         provider: 'aws'
         command: 'apply'
+	commandOptions: '-var-file terraform.prod.tfvars'
         environmentServiceNameAWS: 'Sandbox AWS for Terraform Service Connection'
 		
 - stage: DeploytoProd
@@ -50,11 +50,12 @@ stages:
       inputs:
         provider: 'aws'
         command: 'plan'
-		commandOptions: '-var-file terraform.prod.tfvars'
+	commandOptions: '-var-file terraform.prod.tfvars'
         environmentServiceNameAWS: 'Sandbox AWS for Terraform Service Connection'
     
     - task: TerraformTaskV1@0
       inputs:
         provider: 'aws'
         command: 'apply'
+	commandOptions: '-var-file terraform.prod.tfvars'
         environmentServiceNameAWS: 'Sandbox AWS for Terraform Service Connection'
